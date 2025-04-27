@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscription</title>
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: lightgray;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .register-card {
+      width: 100%;
+      max-width: 500px;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="register-card">
+    <h2 class="text-center mb-4">Créer un compte</h2>
+    <form action="/register" method="POST">
+      <div class="mb-3">
+        <label for="name" class="form-label">Nom</label>
+        <input type="text" name="name" id="name" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="email" class="form-label">Adresse e-mail</label>
+        <input type="email" name="email" id="email" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Mot de passe</label>
+        <input type="password" name="password" id="password" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="role" class="form-label">Rôle</label>
+        <select name="role" id="role" class="form-select" required>
+          <option value="">Choisir un rôle</option>
+          <option value="client">Client</option>
+          <option value="professionel">Professionnel</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">S'inscrire</button>
+    </form>
+    <p class="text-center mt-3">
+      <small>Déjà un compte ? <a href="/login">Se connecter</a></small>
+    </p>
+  </div>
+
+</body>
+</html>

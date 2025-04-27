@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Connexion</title>
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(to right, #d6d6d8, #7a7a7c);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .card {
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      background-color: white;
+      width: 100%;
+      max-width: 400px;
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .btn-primary {
+      background-color: #667eea;
+      border-color: #667eea;
+    }
+
+    .btn-primary:hover {
+      background-color: #5a67d8;
+      border-color: #5a67d8;
+    }
+
+    .alert {
+      display: none;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 class="text-center mb-4">Connexion</h2>
+    <div class="alert alert-danger" id="errorAlert" role="alert"></div>
+    <div id="loginMessage" class="alert" role="alert"></div> <!-- Ajout de l'élément pour afficher les messages -->
+    <form id="loginForm" method="post">
+      <div class="mb-3">
+        <label for="email" class="form-label">Adresse e-mail</label>
+        <input type="email" class="form-control" id="email" name="email" placeholder="exemple@mail.com" required>
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Mot de passe</label>
+        <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+      <p class="text-center mt-3">
+        <small>Pas encore de compte ? <a href="/register">Inscription</a></small>
+      </p>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+        e.preventDefault(); // Empêche le rechargement
+    
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const messageBox = document.getElementById('loginMessage'); 
+    
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok) {
+                // Succès : afficher le message
+                messageBox.textContent = data.message;
+                messageBox.style.color = 'green';
+    
+                // Stocker le token si tu veux
+                localStorage.setItem('token', data.token);
+    
+                // Redirection après un petit délai (1s)
+                setTimeout(() => {
+                    if (data.role === 'admin') {
+                        window.location.href = '/dashboard/admin';
+                    } else if (data.role === 'pro') {
+                        window.location.href = '/dashboard/pro';
+                    } else {
+                        window.location.href = '/dashboard/client';
+                    }
+                }, 1000); // 1 seconde
+            } else {
+                // Échec : afficher le message d’erreur
+                messageBox.textContent = data.message;
+                messageBox.style.color = 'red';
+            }
+    
+        } catch (error) {
+            console.error('Erreur:', error);
+            messageBox.textContent = 'Erreur réseau';
+            messageBox.style.color = 'red';
+        }
+    });
+  </script>
+</body>
+</html>

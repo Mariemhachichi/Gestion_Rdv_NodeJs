@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendrier</title>
+       <!-- Font Awesome CSS for icons -->
+       <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="d-flex" id="wrapper">
+    <!-- Sidebar -->
+    <div class="bg-dark text-white" id="sidebar" style="width: 250px; height: 100vh;">
+        <div class="d-flex flex-column justify-content-between h-100 p-3 text-white bg-dark">
+            <!-- Haut: Info utilisateur -->
+            <div>
+              <div class="mb-4 text-center">
+                <i class="fas fa-user-circle fa-3x"></i>
+                <h5 class="mt-2"><%= user.name %></h5>
+                <span class="badge bg-secondary"><%= user.role %></span>
+              </div>
+          
+              <!-- Navigation -->
+              <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item">
+                  <a href="/dashboard/admin" class="nav-link text-white">
+                    <i class="fas fa-home me-2"></i> Accueil
+                  </a>
+                </li>
+                <li>
+                  <a href="/rdvss" class="nav-link text-white">
+                    <i class="fas fa-calendar-check me-2"></i> Rendez-vous
+                  </a>
+                </li>
+                <li>
+                  <a href="/calendar" class="nav-link text-white">
+                    <i class="fas fa-calendar-alt me-2"></i> Calendrier
+                  </a>
+                </li>
+              </ul>
+            </div>
+          
+            <!-- Bas: Paramètres et Déconnexion -->
+            <div class="border-top pt-3">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#userSettingsModal" class="d-flex align-items-center text-white mb-2 text-decoration-none">
+                    <i class="fas fa-cog me-2"></i> Paramètres
+                  </a> 
+              </a>
+              <a href="/login" class="d-flex align-items-center text-white text-decoration-none">
+                <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+              </a>
+            </div>
+          </div>
+          
+    </div>
+
+    <!-- Main content area -->
+    <div id="page-content-wrapper" class="flex-grow-1 p-4">
+
+      <!-- Main Content -->
+      <main class="container py-2">
+        <div id="calendar" style="max-width: 900px; margin: auto; height: 600px;"></div>
+        <div id="calendar"></div>
+      </main>
+    </div>
+  </div>
+
+    <!-- Modal pour afficher les détails d'un RDV -->
+    <div class="modal" tabindex="-1" id="eventModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Détails du Rendez-vous</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="eventForm">
+                        <div class="mb-3">
+                            <label for="clientName" class="form-label">Client</label>
+                            <input type="text" class="form-control" id="clientName" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="professionalName" class="form-label">Professionnel</label>
+                            <input type="text" class="form-control" id="professionalName" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Statut</label>
+                            <select class="form-control" id="status">
+                                <option value="en attente">En attente</option>
+                                <option value="confirmé">Confirmé</option>
+                                <option value="annulé">Annulé</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-primary" id="saveBtn">Valider</button>
+                </div>
+            </div>
+        </div>
+    </div>
+  <!-- FullCalendar Script -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script>
+    let currentEventId = null; // Variable pour stocker l'ID du RDV sélectionné
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const calendarEl = document.getElementById('calendar');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            events: '/Rdvs', // L'API pour récupérer les rendez-vous
+            editable: true, // Permet le déplacement des événements
+            droppable: true, // Permet de déplacer l'événement
+            eventDrop: function (info) {
+                const event = info.event;
+                const newDate = event.start;
+
+                // Appel à l'API pour mettre à jour la date du RDV
+                fetch(`/rdv/${event.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        date: newDate // Mettre à jour la date avec la nouvelle position
+                    })
+                }).then(response => {
+                    if (response.ok) {
+                        alert('Rendez-vous déplacé avec succès');
+                    }
+                }).catch(err => {
+                    alert('Erreur lors du déplacement');
+                });
+            },
+eventClick: function (info) {
+    const event = info.event;
+    currentEventId = event.id; // Assigne l'ID de l'événement
+
+    console.log("Événement sélectionné:", event); // Vérifie les propriétés de l'événement
+    console.log("currentEventId:", currentEventId); // Vérifie que l'ID est correctement défini
+
+    // Remplir les champs avec les informations du RDV
+    document.getElementById('clientName').value = event.extendedProps.client;
+    document.getElementById('professionalName').value = event.extendedProps.professional;
+    document.getElementById('description').value = event.extendedProps.description;
+    document.getElementById('status').value = event.extendedProps.status;
+
+    // Afficher le modal
+    new bootstrap.Modal(document.getElementById('eventModal')).show();
+},
+
+            locale: 'fr',
+            eventColor: '#198754',
+        });
+
+        calendar.render();
+    });
+
+    // Fonction pour valider les modifications
+    document.getElementById('saveBtn').addEventListener('click', function () {
+      console.log('Le bouton "Valider" a été cliqué');
+  
+      const updatedDescription = document.getElementById('description').value;
+      const updatedStatus = document.getElementById('status').value;
+  
+      console.log('Nouvelle description:', updatedDescription);
+      console.log('Nouveau statut:', updatedStatus);
+  
+      if (currentEventId) {
+          console.log('ID du rendez-vous actuel:', currentEventId);
+  
+          fetch(`/rdv/${currentEventId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  description: updatedDescription,
+                  status: updatedStatus
+              })
+          })
+          .then(response => {
+              console.log('Réponse du serveur:', response);
+  
+              if (response.ok) {
+                  alert('Rendez-vous modifié avec succès');
+                  location.reload(); // Rafraîchir la page pour recharger les événements
+              } else {
+                  alert('Erreur lors de la modification du rendez-vous');
+              }
+          })
+          .catch(err => {
+              console.log('Erreur lors de la requête fetch:', err);
+              alert('Erreur lors de la modification');
+          });
+      } else {
+          console.log('Aucun événement sélectionné');
+          alert('Aucun rendez-vous sélectionné');
+      }
+  });
+  
+  </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
