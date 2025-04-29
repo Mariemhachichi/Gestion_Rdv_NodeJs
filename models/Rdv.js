@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 
 const RdvSchema = new mongoose.Schema({
+    
     date:{type:Date, required:true},
     professional:{type: mongoose.Schema.Types.ObjectId,ref :'User',required:true},
     client : {type : mongoose.Schema.Types.ObjectId, ref:'User',required:true},
