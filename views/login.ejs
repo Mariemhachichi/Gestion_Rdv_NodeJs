@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Connexion</title>
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(to right, #d6d6d8, #7a7a7c);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .card {
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      background-color: white;
+      width: 100%;
+      max-width: 400px;
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .btn-primary {
+      background-color: #667eea;
+      border-color: #667eea;
+    }
+
+    .btn-primary:hover {
+      background-color: #5a67d8;
+      border-color: #5a67d8;
+    }
+
+    .alert {
+      display: none;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 class="text-center mb-4">Connexion</h2>
+    <% if (typeof error !== 'undefined') { %>
+  <div class="alert alert-danger"><%= error %></div>
+<% } %>
+
+    <form action="/login" method="POST">
+      <div class="mb-3">
+        <label for="email" class="form-label">Adresse e-mail</label>
+        <input type="email" class="form-control" id="email" name="email" placeholder="exemple@mail.com" required>
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Mot de passe</label>
+        <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+      <p class="text-center mt-3">
+        <small>Pas encore de compte ? <a href="/register">Inscription</a></small>
+      </p>
+    </form>
+  </div>
+
+</body>
+</html>

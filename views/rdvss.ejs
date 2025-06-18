@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rendez-vous récents</title>
+     <!-- Font Awesome CSS for icons -->
+     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body class="bg-light">
+    <body class="bg-light">
+
+    <div class="d-flex">
+ <!-- Sidebar -->
+ <div class="bg-dark text-white" id="sidebar" style="width: 250px; height: 100vh;">
+  <div class="d-flex flex-column justify-content-between h-100 p-3 text-white bg-dark">
+      <!-- Haut: Info utilisateur -->
+      <div>
+        <div class="mb-4 text-center">
+          <i class="fas fa-user-circle fa-3x"></i>
+          <h5 class="mt-2"><%= user.name %></h5>
+          <span class="badge bg-secondary"><%= user.role %></span>
+        </div>
+    
+        <!-- Navigation -->
+        <ul class="nav nav-pills flex-column mb-auto">
+          <li class="nav-item">
+            <a href="/dashboard/admin" class="nav-link text-white">
+              <i class="fas fa-home me-2"></i> Accueil
+            </a>
+          </li>
+          <li>
+            <a href="/rdvss" class="nav-link text-white">
+              <i class="fas fa-calendar-check me-2"></i> Rendez-vous
+            </a>
+          </li>
+          <li>
+            <a href="/calendar" class="nav-link text-white">
+              <i class="fas fa-calendar-alt me-2"></i> Calendrier
+            </a>
+          </li>
+        </ul>
+      </div>
+    
+      <!-- Bas: Paramètres et Déconnexion -->
+      <div class="border-top pt-3">
+          <a href="#" data-bs-toggle="modal" data-bs-target="#userSettingsModal" class="d-flex align-items-center text-white mb-2 text-decoration-none">
+              <i class="fas fa-cog me-2"></i> Paramètres
+            </a> 
+        </a>
+        <a href="/login" class="d-flex align-items-center text-white text-decoration-none">
+          <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+        </a>
+      </div>
+    </div>
+    
+</div>
+
+        <!-- Contenu principal -->
+        <div class="flex-grow-1 p-4">
+            <div class="container py-5">
+                <h3 class="mb-4">Rendez-vous récents</h3>
+                <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addModal">Ajouter un rendez-vous</button>
+
+                <!-- Table des rendez-vous -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5>Liste des rendez-vous récents</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Client</th>
+                                    <th>Professionnel</th>
+                                    <th>Date & Heure</th>
+                                    <th>Service</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointmentsTable">
+                                <!-- Les rendez-vous seront injectés ici -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+    <!-- Modal de modification -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editModalLabel">Modifier le rendez-vous</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+          </div>
+          <div class="modal-body">
+            <form id="editForm">
+              <input type="hidden" id="editId">
+              <div class="mb-3">
+                <label for="editClient" class="form-label">Client</label>
+                <input type="text" class="form-control" id="editClient" disabled>
+              </div>
+              <div class="mb-3">
+                <label for="editProfessional" class="form-label">Professionnel</label>
+                <input type="text" class="form-control" id="editProfessional" disabled>
+              </div>
+              <div class="mb-3">
+                <label for="editDate" class="form-label">Date & Heure</label>
+                <input type="datetime-local" class="form-control" id="editDate">
+              </div>
+              <div class="mb-3">
+                <label for="editService" class="form-label">Service</label>
+                <input type="text" class="form-control" id="editService">
+              </div>
+              <div class="mb-3">
+                <label for="editStatus" class="form-label">Statut</label>
+                <select class="form-select" id="editStatus">
+                  <option value="confirmé">Confirmé</option>
+                  <option value="annulé">Annulé</option>
+                  <option value="en attente">En attente</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal d'ajout -->
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addModalLabel">Ajouter un rendez-vous</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <form id="addForm">
+            <div class="mb-3">
+              <label for="addClient" class="form-label">Client</label>
+              <select class="form-select" id="addClient" required></select>
+            </div>
+            <div class="mb-3">
+              <label for="addProfessional" class="form-label">Professionnel</label>
+              <select class="form-select" id="addProfessional" required></select>
+            </div>
+            <div class="mb-3">
+              <label for="addDate" class="form-label">Date & Heure</label>
+              <input type="datetime-local" class="form-control" id="addDate" required>
+            </div>
+            <div class="mb-3">
+              <label for="addService" class="form-label">Service</label>
+              <input type="text" class="form-control" id="addService">
+            </div>
+            <div class="mb-3">
+              <label for="addStatus" class="form-label">Statut</label>
+              <select class="form-select" id="addStatus">
+                <option value="confirmé">Confirmé</option>
+                <option value="annulé">Annulé</option>
+                <option value="en attente">En attente</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Ajouter</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+    <script>
+        let appointments = [];
+
+        // Fonction pour afficher les rendez-vous
+        function displayAppointments(data) {
+            appointments = data;
+            const table = document.getElementById('appointmentsTable');
+            table.innerHTML = '';
+
+            data.forEach(rdv => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${rdv.client?.name || 'N/A'}</td>
+                    <td>${rdv.professional?.name || 'N/A'}</td>
+                    <td>${new Date(rdv.date).toLocaleString()}</td>
+                    <td>${rdv.description || '-'}</td>
+                    <td>${rdv.status}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="openEditModal('${rdv._id}')">Modifier</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteAppointment('${rdv._id}')">Supprimer</button>
+                    </td>
+                `;
+                table.appendChild(row);
+            });
+        }
+
+        // Fonction pour ouvrir la modal avec les données pré-remplies
+        function openEditModal(id) {
+            const rdv = appointments.find(r => r._id === id); // Assure-toi que _id est utilisé
+            console.log('Rendez-vous trouvé :', rdv); // Ajoute un console.log pour vérifier
+
+            if (!rdv) {
+                console.log('Rendez-vous non trouvé');
+                return;
+            }
+
+            // Remplissage des champs du formulaire avec les données du rendez-vous
+            document.getElementById('editId').value = rdv._id;
+            document.getElementById('editClient').value = rdv.client?.name || 'N/A';
+            document.getElementById('editProfessional').value = rdv.professional?.name || 'N/A';
+            document.getElementById('editDate').value = new Date(rdv.date).toISOString().slice(0, 16); // Format pour datetime-local
+            document.getElementById('editService').value = rdv.description || '';
+            document.getElementById('editStatus').value = rdv.status;
+
+            const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+            editModal.show();
+        }
+
+        // Gestion de la soumission du formulaire de modification
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('editId').value; // Récupère l'ID du champ caché
+
+            if (!id) {
+                alert('ID du rendez-vous manquant');
+                return;
+            }
+
+            const rdv = appointments.find(r => r._id === id);
+            const updatedData = {
+                date: new Date(document.getElementById('editDate').value).toISOString(),
+                description: document.getElementById('editService').value,
+                status: document.getElementById('editStatus').value,
+                professional: rdv?.professional || null,
+                client: rdv?.client || null
+            };
+
+            // Envoi de la requête PUT avec l'ID
+            fetch(`/rdv/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedData)
+            })
+            .then(res => {
+                if (!res.ok) {
+                    res.text().then(errorMsg => {
+                        console.error('Erreur serveur:', errorMsg);
+                        alert('Erreur lors de la modification: ' + errorMsg);
+                    });
+                    throw new Error('Erreur serveur');
+                }
+                return res.json();
+            })
+            .then(() => {
+                alert('Rendez-vous modifié avec succès');
+                fetchAppointments(); // Mettre à jour l'affichage
+                const editModal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+                editModal.hide();
+            })
+            .catch(error => console.error('Erreur:', error));
+        });
+
+        // Fonction pour récupérer les rendez-vous
+        function fetchAppointments() {
+            fetch('/api/stats/rdvs')
+                .then(res => res.json())
+                .then(data => {
+                    displayAppointments(data);
+                })
+                .catch(err => console.error('Erreur lors de la récupération des rendez-vous:', err));
+        }
+
+        // Fonction pour supprimer un rendez-vous
+        function deleteAppointment(id) {
+            if (confirm('Voulez-vous vraiment supprimer ce rendez-vous ?')) {
+                fetch(`/rdv/${id}`, {
+                    method: 'DELETE',
+                })
+                .then(res => {
+                    if (res.ok) {
+                        alert('Rendez-vous supprimé');
+                        fetchAppointments();
+                    } else {
+                        alert('Erreur lors de la suppression');
+                    }
+                });
+            }
+        }
+
+// Charger les clients et professionnels dans les selects
+function loadClientsAndPros() {
+    fetch('/clients')
+        .then(res => res.json())
+        .then(data => {
+            const clientSelect = document.getElementById('addClient');
+            clientSelect.innerHTML = data.map(c => `<option value="${c._id}">${c.name}</option>`).join('');
+        });
+
+    fetch('/professionals')
+        .then(res => res.json())
+        .then(data => {
+            const proSelect = document.getElementById('addProfessional');
+            proSelect.innerHTML = data.map(p => `<option value="${p._id}">${p.name}</option>`).join('');
+        });
+}
+
+
+// Affiche les données à l'ouverture du modal
+document.getElementById('addModal').addEventListener('show.bs.modal', loadClientsAndPros);
+
+// Gérer l'ajout
+document.getElementById('addForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const newAppointment = {
+        client: document.getElementById('addClient').value,
+        professional: document.getElementById('addProfessional').value,
+        date: new Date(document.getElementById('addDate').value).toISOString(),
+        description: document.getElementById('addService').value,
+        status: document.getElementById('addStatus').value
+    };
+
+    fetch('/rdv/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newAppointment)
+    })
+    .then(res => res.json())
+    .then(() => {
+        alert('Rendez-vous ajouté avec succès');
+        fetchAppointments();
+        bootstrap.Modal.getInstance(document.getElementById('addModal')).hide();
+        document.getElementById('addForm').reset();
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Erreur lors de l\'ajout');
+    });
+});
+
+
+        window.onload = function() {
+            fetchAppointments();
+        };
+    </script>
+</body>
+</html>

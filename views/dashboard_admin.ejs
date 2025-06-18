@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de bord Admin</title>
+      <!-- Font Awesome CSS for icons -->
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+    <!-- public/index.html -->
+
+</head>
+<body class="bg-light">
+
+  <div class="d-flex" id="wrapper">
+    <!-- Sidebar -->
+    <div class="bg-dark text-white" id="sidebar" style="width: 250px; height: 100vh;">
+      <div class="d-flex flex-column justify-content-between h-100 p-3">
+        <!-- Info utilisateur -->
+        <div>
+          <div class="mb-4 text-center">
+            <i class="fas fa-user-circle fa-3x"></i>
+            <h5 class="mt-2"><%= user.name %></h5>
+            <span class="badge bg-secondary text-capitalize"><%= user.role %></span>
+          </div>
+
+          <!-- Navigation -->
+          <ul class="nav nav-pills flex-column mb-auto">
+            <li class="nav-item">
+              <a href="/dashboard/admin" class="nav-link text-white">
+                <i class="fas fa-home me-2"></i> Accueil
+              </a>
+            </li>
+            <li>
+              <a href="/rdvss" class="nav-link text-white">
+                <i class="fas fa-calendar-check me-2"></i> Rendez-vous
+              </a>
+            </li>
+            <li>
+              <a href="/calendar" class="nav-link text-white">
+                <i class="fas fa-calendar-alt me-2"></i> Calendrier
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Paramètres et Déconnexion -->
+        <div class="border-top pt-3">
+          <a href="#" data-bs-toggle="modal" data-bs-target="#userSettingsModal" class="d-flex align-items-center text-white mb-2 text-decoration-none">
+            <i class="fas fa-cog me-2"></i> Paramètres
+          </a>
+          <a href="/logout" class="d-flex align-items-center text-white text-decoration-none">
+            <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <div id="page-content-wrapper" style="width: 100%;">
+      <main class="container py-5">
+        <!-- Statistiques -->
+        <div class="row mb-4">
+          <div class="col-md-3 mb-3">
+            <div class="card shadow-sm">
+              <div class="card-body text-center">
+                <h5 class="card-title">Total Utilisateurs</h5>
+                <p class="card-text h3"><%= stats.users %></p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="card shadow-sm">
+              <div class="card-body text-center">
+                <h5 class="card-title">Professionnels</h5>
+                <p class="card-text h3"><%= stats.professionals %></p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="card shadow-sm">
+              <div class="card-body text-center">
+                <h5 class="card-title">Clients</h5>
+                <p class="card-text h3"><%= stats.clients %></p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="card shadow-sm">
+              <div class="card-body text-center">
+                <h5 class="card-title">Total Rendez-vous</h5>
+                <p class="card-text h3"><%= stats.rdvs %></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gestion des utilisateurs -->
+        <div class="card shadow-sm">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Gestion des utilisateurs</h5>
+            <button id="addUserBtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">Ajouter un utilisateur</button>
+          </div>
+          <div class="card-body d-flex flex-wrap">
+            <!-- Graphique -->
+            <div style="width: 30%;">
+              <h5>Statistiques des utilisateurs</h5>
+              <canvas id="statsChart"></canvas>
+            </div>
+            <!-- Table des utilisateurs -->
+            <div class="table-responsive" style="width: 70%; padding-left: 20px;">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Rôle</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTable">
+                <% users.forEach(user => { %>
+  <tr>
+    <td><%= user.name %></td>
+    <td><%= user.email %></td>
+    <td class="text-capitalize"><%= user.role %></td>
+    <td>
+      <button class="btn btn-sm btn-warning editUserBtn" data-id="<%= user._id %>">Modifier</button>
+      <form action="/users/<%= user._id %>?_method=DELETE" method="POST" class="d-inline">
+        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer cet utilisateur ?')">Supprimer</button>
+      </form>
+    </td>
+  </tr>
+<% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal Ajouter utilisateur -->
+  <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form id="addUserForm" class="modal-content" method="POST" action="/users">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addUserModalLabel">Ajouter un utilisateur</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="name" class="form-label">Nom</label>
+            <input type="text" class="form-control" id="name" name="name" required />
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" required />
+          </div>
+          <div class="mb-3">
+            <label for="role" class="form-label">Rôle</label>
+            <select class="form-select" id="role" name="role" required>
+              <option value="client">Client</option>
+              <option value="professionnel">Professionnel</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Mot de passe</label>
+            <input type="password" class="form-control" id="password" name="password" required />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Ajouter</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Modifier utilisateur -->
+  <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form id="editUserForm" class="modal-content" method="POST" action="">
+        <input type="hidden" id="editUserId" name="userId" />
+        <div class="modal-header">
+          <h5 class="modal-title" id="editUserModalLabel">Modifier l'utilisateur</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="editName" class="form-label">Nom</label>
+            <input type="text" class="form-control" id="editName" name="name" required />
+          </div>
+          <div class="mb-3">
+            <label for="editEmail" class="form-label">Email</label>
+            <input type="email" class="form-control" id="editEmail" name="email" required />
+          </div>
+          <div class="mb-3">
+            <label for="editRole" class="form-label">Rôle</label>
+            <select class="form-select" id="editRole" name="role" disabled>
+              <option value="client">Client</option>
+              <option value="professionnel">Professionnel</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="editPassword" class="form-label">Nouveau mot de passe (facultatif)</label>
+            <input type="password" class="form-control" id="editPassword" name="password" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Paramètres utilisateur -->
+  <div class="modal fade" id="userSettingsModal" tabindex="-1" aria-labelledby="userSettingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form class="modal-content" id="userSettingsForm" method="POST" action="/users/<%= user._id %>?_method=PUT">
+        <input type="hidden" id="settingsUserId" name="userId" value="<%= user._id %>" />
+        <div class="modal-header">
+          <h5 class="modal-title" id="userSettingsModalLabel">Modifier mes informations</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="settingsName" class="form-label">Nom</label>
+            <input type="text" class="form-control" id="settingsName" name="name" value="<%= user.name %>" required />
+          </div>
+          <div class="mb-3">
+            <label for="settingsEmail" class="form-label">Email</label>
+            <input type="email" class="form-control" id="settingsEmail" name="email" value="<%= user.email %>" required />
+          </div>
+          <div class="mb-3">
+            <label for="settingsPassword" class="form-label">Nouveau mot de passe (facultatif)</label>
+            <input type="password" class="form-control" id="settingsPassword" name="password" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+    <script>
+
+//modifier user conneceter
+document.getElementById('userSettingsForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+  
+    const userId = document.getElementById('settingsUserId').value;
+    const name = document.getElementById('settingsName').value;
+    const email = document.getElementById('settingsEmail').value;
+    const password = document.getElementById('settingsPassword').value;
+  
+    const updatedUser = { name, email };
+    if (password) updatedUser.password = password;
+  
+    console.log('Données à envoyer :', updatedUser);
+
+    fetch(`/users/${userId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedUser)
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Erreur lors de la mise à jour");
+        return res.json();
+      })
+      .then(data => {
+        alert("Informations mises à jour !");
+        bootstrap.Modal.getInstance(document.getElementById('userSettingsModal')).hide();
+        location.reload();
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Erreur lors de la mise à jour.");
+      });
+    
+  });
+
+   // Fonction pour récupérer les données depuis les API
+   async function fetchData() {
+    const users = await fetch('/api/stats/users').then(res => res.json());
+    const clients = await fetch('/api/stats/clients').then(res => res.json());
+    const professionals = await fetch('/api/stats/professionnels').then(res => res.json());
+    const rdvs = await fetch('/api/stats/rdv').then(res => res.json());
+
+    return {
+        users: users.total,
+        clients: clients.total,
+        professionals: professionals.total,
+        rdvs: rdvs.total
+    };
+}
+
+// Fonction pour afficher le graphique avec les données récupérées
+async function renderChart() {
+    const data = await fetchData();
+
+    const ctx = document.getElementById('statsChart').getContext('2d');
+    const statsChart = new Chart(ctx, {
+        type: 'bar',  // Type de graphique (barres)
+        data: {
+            labels: ['Utilisateurs', 'Clients', 'Professionnels', 'Rendez-vous'],
+            datasets: [{
+                label: 'Total',
+                data: [data.users, data.clients, data.professionals, data.rdvs],  // Les vraies valeurs des API
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Lancer la fonction pour afficher le graphique
+renderChart();
+  
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js  -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</body>
+</html>
