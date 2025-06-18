@@ -129,7 +129,10 @@
     <td class="text-capitalize"><%= user.role %></td>
     <td>
       <button class="btn btn-sm btn-warning editUserBtn" data-id="<%= user._id %>">Modifier</button>
-      <form action="/users/<%= user._id %>?_method=DELETE" method="POST" class="d-inline">
+
+      
+    
+      <form action="/users/<%= user._id %>/delete" method="POST" style="display:inline;">
         <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer cet utilisateur ?')">Supprimer</button>
       </form>
     </td>
@@ -165,7 +168,7 @@
             <label for="role" class="form-label">Rôle</label>
             <select class="form-select" id="role" name="role" required>
               <option value="client">Client</option>
-              <option value="professionnel">Professionnel</option>
+              <option value="professionel">Professionnel</option>
               <option value="admin">Admin</option>
             </select>
           </div>
@@ -185,7 +188,9 @@
   <!-- Modal Modifier utilisateur -->
   <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <form id="editUserForm" class="modal-content" method="POST" action="">
+   
+        <form id="editUserForm" class="modal-content" action="/users/<%= user._id %>/edit" method="POST">
+
         <input type="hidden" id="editUserId" name="userId" />
         <div class="modal-header">
           <h5 class="modal-title" id="editUserModalLabel">Modifier l'utilisateur</h5>
@@ -204,7 +209,7 @@
             <label for="editRole" class="form-label">Rôle</label>
             <select class="form-select" id="editRole" name="role" disabled>
               <option value="client">Client</option>
-              <option value="professionnel">Professionnel</option>
+              <option value="professionel">Professionnel</option>
               <option value="admin">Admin</option>
             </select>
           </div>
@@ -252,7 +257,33 @@
     </div>
   </div>
   
-    <script>
+
+  <script>
+  //"Modifier"
+  document.querySelectorAll('.editUserBtn').forEach(button => {
+    button.addEventListener('click', function () {
+      const userId = this.getAttribute('data-id');
+
+      // données de l'utilisateur 
+      const row = this.closest('tr');
+      const name = row.querySelector('td:nth-child(1)').textContent.trim();
+      const email = row.querySelector('td:nth-child(2)').textContent.trim();
+      const role = row.querySelector('td:nth-child(3)').textContent.trim();
+
+      // Remplir form
+      document.getElementById('editUserId').value = userId;
+      document.getElementById('editName').value = name;
+      document.getElementById('editEmail').value = email;
+      document.getElementById('editRole').value = role;
+
+      document.getElementById('editUserForm').action = `/users/${userId}/edit`;
+
+      // Ouvrir le modal Bootstrap
+      const editModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+      editModal.show();
+    });
+  });
+
 
 //modifier user conneceter
 document.getElementById('userSettingsForm').addEventListener('submit', function (e) {
@@ -268,8 +299,8 @@ document.getElementById('userSettingsForm').addEventListener('submit', function 
   
     console.log('Données à envoyer :', updatedUser);
 
-    fetch(`/users/${userId}`, {
-      method: 'PUT',
+    fetch(`/users/${userId}/edit`, {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updatedUser)
     })
@@ -289,7 +320,7 @@ document.getElementById('userSettingsForm').addEventListener('submit', function 
     
   });
 
-   // Fonction pour récupérer les données depuis les API
+   // les API calcul
    async function fetchData() {
     const users = await fetch('/api/stats/users').then(res => res.json());
     const clients = await fetch('/api/stats/clients').then(res => res.json());
@@ -304,18 +335,18 @@ document.getElementById('userSettingsForm').addEventListener('submit', function 
     };
 }
 
-// Fonction pour afficher le graphique avec les données récupérées
+//  le graphique 
 async function renderChart() {
     const data = await fetchData();
 
     const ctx = document.getElementById('statsChart').getContext('2d');
     const statsChart = new Chart(ctx, {
-        type: 'bar',  // Type de graphique (barres)
+        type: 'bar',  
         data: {
             labels: ['Utilisateurs', 'Clients', 'Professionnels', 'Rendez-vous'],
             datasets: [{
                 label: 'Total',
-                data: [data.users, data.clients, data.professionals, data.rdvs],  // Les vraies valeurs des API
+                data: [data.users, data.clients, data.professionals, data.rdvs],  
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
@@ -331,7 +362,7 @@ async function renderChart() {
     });
 }
 
-// Lancer la fonction pour afficher le graphique
+// afficher le graph
 renderChart();
   
     </script>

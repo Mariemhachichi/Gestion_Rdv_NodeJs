@@ -40,8 +40,9 @@ router.post('/users', async (req, res) => {
 
     const newUser = new User({ name, email, password, role });
     await newUser.save();
+    res.redirect('/dashboard/admin');
 
-    res.status(201).json({ message: 'Utilisateur créé avec succès', user: newUser });
+  
   } catch (error) {
     console.error('Erreur lors de la création de l’utilisateur :', error);
     res.status(500).json({ message: 'Erreur serveur lors de la création de l’utilisateur' });
@@ -49,16 +50,16 @@ router.post('/users', async (req, res) => {
 });
 
 //modif user
-router.put('/users/:id', async (req, res) => {
+router.post('/users/:id/edit', async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
-     delete updates.role;
+    delete updates.role;
 
     if (updates.password && updates.password.trim() !== '') {
       updates.password = await bcrypt.hash(updates.password, 10);
     } else {
-      delete updates.password; 
+      delete updates.password;
     }
 
     const updatedUser = await User.findByIdAndUpdate(id, updates, { new: true });
@@ -67,23 +68,23 @@ router.put('/users/:id', async (req, res) => {
       return res.status(404).json({ message: 'Utilisateur non trouvé.' });
     }
 
-    res.json({ message: 'Utilisateur modifié avec succès.', user: updatedUser });
+    res.redirect('/dashboard/admin');
   } catch (error) {
     console.error('Erreur mise à jour :', error);
-    res.status(500).json({ message: 'Erreur serveur.' });
+    res.status(500).send('Erreur serveur');
   }
 });
 
-//Delete user
-router.delete('/user/:id', async (req, res) => {
+
+// Delete 
+router.post('/users/:id/delete', async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Utilisateur supprimé' });
+    res.redirect('/dashboard/admin');
   } catch (err) {
     res.status(500).json({ error: 'Erreur serveur' });
   }
 });
-
 
 
 module.exports = router;

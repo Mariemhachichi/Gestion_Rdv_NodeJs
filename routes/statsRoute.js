@@ -14,6 +14,7 @@ router.get('/api/stats/users', async (req, res) => {
     res.status(500).json({ message: "Erreur serveur" });
   }
 });
+
 // Total clients
 router.get('/api/stats/clients', async (req, res) => {
     try {
@@ -35,6 +36,7 @@ router.get('/api/stats/professionnels', async (req, res) => {
       res.status(500).json({ message: "Erreur serveur" });
     }
   });
+
   // Total rendez-vous
 router.get('/api/stats/rdv', async (req, res) => {
     try {
@@ -45,12 +47,13 @@ router.get('/api/stats/rdv', async (req, res) => {
       res.status(500).json({ message: "Erreur serveur" });
     }
   });
+
   //affiche table rdv
   router.get('/api/stats/rdvs', async (req, res) => {
     try {
       const rdvs = await Rdv.find()
-        .populate('client', 'name')  // ← adapte selon ton modèle User
-        .populate('professional', 'name');  // ← idem ici
+        .populate('client', 'name')  
+        .populate('professional', 'name');  
   
       console.log("RDVs récupérés :", rdvs);
       res.json(rdvs);
@@ -59,19 +62,17 @@ router.get('/api/stats/rdv', async (req, res) => {
       res.status(500).json({ message: "Erreur lors de la récupération des rendez-vous" });
     }
   });
-  // Récupérer tous les utilisateurs
+
+  //tous les utilisateurs
   router.get('/api/stats/AllUsers', async (req, res) => {
     try {
-      const users = await User.find();  // Trouve tous les utilisateurs
-      const total = users.length;  // Calculer le nombre total d'utilisateurs
-      res.json({ total, users });  // Envoie les utilisateurs avec le total
+      const users = await User.find();  
+      const total = users.length;  
+      res.json({ total, users });  
     } catch (err) {
       console.error("Erreur lors de la récupération des utilisateurs :", err);
       res.status(500).json({ message: "Erreur lors de la récupération des utilisateurs" });
     }
   });
-
-  
-  
 
 module.exports = router;
