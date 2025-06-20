@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const sendEmailToProfessional = async (professionalEmail, subject, message) => {
-  // Création du transporteur Nodemailer
+ 
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -11,7 +11,6 @@ const sendEmailToProfessional = async (professionalEmail, subject, message) => {
     }
   });
 
-  // Options du mail
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: professionalEmail,

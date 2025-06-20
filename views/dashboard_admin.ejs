@@ -130,8 +130,6 @@
     <td>
       <button class="btn btn-sm btn-warning editUserBtn" data-id="<%= user._id %>">Modifier</button>
 
-      
-    
       <form action="/users/<%= user._id %>/delete" method="POST" style="display:inline;">
         <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer cet utilisateur ?')">Supprimer</button>
       </form>
@@ -229,7 +227,7 @@
   <!-- Modal Paramètres utilisateur -->
   <div class="modal fade" id="userSettingsModal" tabindex="-1" aria-labelledby="userSettingsModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <form class="modal-content" id="userSettingsForm" method="POST" action="/users/<%= user._id %>?_method=PUT">
+      <form class="modal-content" id="userSettingsForm" method="POST" action="/users/<%= user._id %>?_method=POST">
         <input type="hidden" id="settingsUserId" name="userId" value="<%= user._id %>" />
         <div class="modal-header">
           <h5 class="modal-title" id="userSettingsModalLabel">Modifier mes informations</h5>
@@ -264,7 +262,7 @@
     button.addEventListener('click', function () {
       const userId = this.getAttribute('data-id');
 
-      // données de l'utilisateur 
+      // données
       const row = this.closest('tr');
       const name = row.querySelector('td:nth-child(1)').textContent.trim();
       const email = row.querySelector('td:nth-child(2)').textContent.trim();
@@ -278,7 +276,7 @@
 
       document.getElementById('editUserForm').action = `/users/${userId}/edit`;
 
-      // Ouvrir le modal Bootstrap
+      // Ouvrir modal
       const editModal = new bootstrap.Modal(document.getElementById('editUserModal'));
       editModal.show();
     });

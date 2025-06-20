@@ -112,25 +112,24 @@
   <!-- FullCalendar Script -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
   <script>
-    let currentEventId = null; // Variable pour stocker l'ID du RDV sélectionné
-
+    let currentEventId = null; 
     document.addEventListener('DOMContentLoaded', function () {
         const calendarEl = document.getElementById('calendar');
         const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
-            events: '/Rdvs', // L'API pour récupérer les rendez-vous
-            editable: true, // Permet le déplacement des événements
-            droppable: true, // Permet de déplacer l'événement
+            events: '/Rdvs', //GET
+            editable: true, 
+            droppable: true, 
             eventDrop: function (info) {
                 const event = info.event;
                 const newDate = event.start;
 
-                // Appel à l'API pour mettre à jour la date du RDV
+                // MODIF
                 fetch(`/rdv/${event.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        date: newDate // Mettre à jour la date avec la nouvelle position
+                        date: newDate 
                     })
                 }).then(response => {
                     if (response.ok) {
@@ -142,18 +141,18 @@
             },
 eventClick: function (info) {
     const event = info.event;
-    currentEventId = event.id; // Assigne l'ID de l'événement
+    currentEventId = event.id; 
 
-    console.log("Événement sélectionné:", event); // Vérifie les propriétés de l'événement
-    console.log("currentEventId:", currentEventId); // Vérifie que l'ID est correctement défini
+    console.log("Événement sélectionné:", event); 
+    console.log("currentEventId:", currentEventId); 
 
-    // Remplir les champs avec les informations du RDV
+    
     document.getElementById('clientName').value = event.extendedProps.client;
     document.getElementById('professionalName').value = event.extendedProps.professional;
     document.getElementById('description').value = event.extendedProps.description;
     document.getElementById('status').value = event.extendedProps.status;
 
-    // Afficher le modal
+    // le modal
     new bootstrap.Modal(document.getElementById('eventModal')).show();
 },
 
@@ -164,7 +163,7 @@ eventClick: function (info) {
         calendar.render();
     });
 
-    // Fonction pour valider les modifications
+    // valider les modifications
     document.getElementById('saveBtn').addEventListener('click', function () {
       console.log('Le bouton "Valider" a été cliqué');
   
@@ -190,7 +189,7 @@ eventClick: function (info) {
   
               if (response.ok) {
                   alert('Rendez-vous modifié avec succès');
-                  location.reload(); // Rafraîchir la page pour recharger les événements
+                  location.reload(); 
               } else {
                   alert('Erreur lors de la modification du rendez-vous');
               }

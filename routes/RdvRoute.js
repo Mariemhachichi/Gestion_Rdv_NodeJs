@@ -43,7 +43,7 @@ router.post('/rdv/add', async (req, res) => {
             return res.status(400).send({ message: 'Client non trouvé' });
         }
 
-
+//Email
         const professionalEmail = professionalData.email;
         const subject = 'Nouveau rendez-vous créé';
         const message = `
@@ -89,7 +89,7 @@ router.put('/rdv/:id', async (req, res) => {
         console.log('Rendez-vous mis à jour:', updatedRdv); 
         res.status(200).send({ message: 'Rendez-vous modifié', rdv: updatedRdv });
     } catch (err) {
-        console.error(err); // Affichage de l'erreur dans les logs
+        console.error(err);  
         return res.status(500).send({ message: 'Erreur serveur lors de la modification' });
     }
 });
