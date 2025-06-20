@@ -21,7 +21,7 @@ router.get('/admin', isAuthenticated, requireRole('admin'), async (req, res) => 
 // Dashboard Professionnel
 router.get('/pro', isAuthenticated, requireRole('professionel'), async (req, res) => {
    try {
-    const rdvs = await Rdv.find({ professionel: req.user._id }).populate('professional', 'name');
+    const rdvs = await Rdv.find({ professional: req.user._id }).populate('client', 'name');
     res.render('dashboard_pro', { user: req.user, rdvs, title: 'Professionnel Dashboard' });
   } catch (error) {
     console.error(error);
